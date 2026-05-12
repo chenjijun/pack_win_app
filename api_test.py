@@ -41,7 +41,7 @@ class DialTestTool:
         config_frame.pack(fill="x", pady=5)
 
         Label(config_frame, text="目标URL:").grid(row=0, column=0, sticky="w")
-        self.url_var = StringVar(value="http://60.10.9.10:8000/MiitDataCheck/page/dialingTest/target/target3.jsp")
+        self.url_var = StringVar(value="https://www.baidu.com")
         url_entry = Entry(config_frame, textvariable=self.url_var, width=80)
         url_entry.grid(row=0, column=1, columnspan=5, sticky="ew", padx=(5, 0))
 
