@@ -9,7 +9,7 @@ from tkinter import (
     Scrollbar, StringVar, IntVar, messagebox, filedialog
 )
 from tkinter.ttk import Progressbar, Style
-
+import encodings
 
 class DialTestTool:
     def __init__(self, root):
