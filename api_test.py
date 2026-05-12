@@ -260,9 +260,7 @@ class DialTestTool:
 
 
 if __name__ == "__main__":
-    # 解决 Windows 控制台编码问题（不影响 GUI）
-    if sys.stdout.encoding != 'utf-8':
-        sys.stdout.reconfigure(encoding='utf-8')
+
 
     root = Tk()
     app = DialTestTool(root)
