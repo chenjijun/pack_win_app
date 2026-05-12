@@ -1,8 +1,8 @@
 name: Build Windows Executable (Manual Trigger)
 
-# 仅在手动触发时运行（移除了 push 触发）
+# 仅允许手动触发（不会因 push 自动运行）
 on:
-  workflow_dispatch:  # 这是关键：只允许手动触发
+  workflow_dispatch:
 
 jobs:
   build-windows:
@@ -30,9 +30,9 @@ jobs:
       - name: Install PyInstaller
         run: pip install pyinstaller
 
-      # 单行打包命令（无换行，无 ^ 或 `）
+      # 关键修复：使用 --collect-all 确保 encodings 完整包含
       - name: Build executable with PyInstaller
-        run: pyinstaller --onefile --windowed --hidden-import=encodings --hidden-import=codecs --name=api_test api_test.py
+        run: pyinstaller --onefile --windowed --collect-all encodings --collect-all codecs --name=api_test api_test.py
 
       - name: Upload executable as artifact
         uses: actions/upload-artifact@v4
