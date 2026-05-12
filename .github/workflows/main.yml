@@ -1,38 +1,58 @@
-name: 打包 Windows 接口拨测工具
+name: Build Windows Executable
 
-# 核心：只允许手动点击运行，不自动触发
+# 触发条件：手动触发 或 推送代码到任何分支
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # 允许手动触发（推荐）
+  push:
+    branches:
+      - '**'  # 监听所有分支
 
 jobs:
   build-windows:
-    runs-on: windows-latest
-    name: Windows 打包
+    runs-on: windows-latest  # 使用 GitHub 提供的 Windows 虚拟机
+    
     steps:
-      - name: 拉取代码
+      # 1. 检出代码
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 设置 Python 3.11
+      # 2. 设置 Python 3.11 环境
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-          architecture: "x64"
+          python-version: '3.11'
+          architecture: 'x64'  # 使用 64 位 Python（更通用）
 
-      - name: 升级 pip
-        run: python -m pip install --upgrade pip
-
-      - name: 安装依赖
-        run: pip install -r requirements.txt
-
-      - name: 安装 PyInstaller
-        run: pip install pyinstaller
-
-      - name: 打包成单文件 EXE（无窗口）
+      # 3. 安装依赖
+      - name: Install dependencies
         run: |
-          pyinstaller -w -F --noconsole --clean api_test.py
+          python -m pip install --upgrade pip
+          if (Test-Path -Path "requirement.txt") {
+            pip install -r requirement.txt
+          } else {
+            Write-Host "No requirement.txt found, skipping dependency installation."
+          }
 
-      - name: 上传打包好的 EXE
+      # 4. 安装 PyInstaller
+      - name: Install PyInstaller
+        run: |
+          pip install pyinstaller
+
+      # 5. 打包应用（关键步骤）
+      - name: Build executable with PyInstaller
+        run: |
+          pyinstaller ^
+            --onefile ^
+            --windowed ^
+            --hidden-import=encodings ^
+            --hidden-import=codecs ^
+            --name=api_test ^
+            api_test.py
+
+      # 6. 上传构建产物（可执行文件）
+      - name: Upload executable as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 接口拨测工具_win_x64
-          path: dist/*.exe
+          name: api_test-windows-x64
+          path: dist/api_test.exe
+          retention-days: 7  # 构建产物保留7天
