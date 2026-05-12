@@ -11,6 +11,8 @@ from tkinter import (
 from tkinter.ttk import Progressbar, Style
 import encodings
 
+
+
 class DialTestTool:
     def __init__(self, root):
         self.root = root
