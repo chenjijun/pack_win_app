@@ -1,58 +1,42 @@
-name: Build Windows Executable
+name: Build Windows Executable (Manual Trigger)
 
-# 触发条件：手动触发 或 推送代码到任何分支
+# 仅在手动触发时运行（移除了 push 触发）
 on:
-  workflow_dispatch:  # 允许手动触发（推荐）
-  push:
-    branches:
-      - '**'  # 监听所有分支
+  workflow_dispatch:  # 这是关键：只允许手动触发
 
 jobs:
   build-windows:
-    runs-on: windows-latest  # 使用 GitHub 提供的 Windows 虚拟机
+    runs-on: windows-latest
     
     steps:
-      # 1. 检出代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 设置 Python 3.11 环境
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          architecture: 'x64'  # 使用 64 位 Python（更通用）
+          architecture: 'x64'
 
-      # 3. 安装依赖
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if (Test-Path -Path "requirement.txt") {
             pip install -r requirement.txt
           } else {
-            Write-Host "No requirement.txt found, skipping dependency installation."
+            Write-Host "No requirement.txt found."
           }
 
-      # 4. 安装 PyInstaller
       - name: Install PyInstaller
-        run: |
-          pip install pyinstaller
+        run: pip install pyinstaller
 
-      # 5. 打包应用（关键步骤）
+      # 单行打包命令（无换行，无 ^ 或 `）
       - name: Build executable with PyInstaller
-        run: |
-          pyinstaller ^
-            --onefile ^
-            --windowed ^
-            --hidden-import=encodings ^
-            --hidden-import=codecs ^
-            --name=api_test ^
-            api_test.py
+        run: pyinstaller --onefile --windowed --hidden-import=encodings --hidden-import=codecs --name=api_test api_test.py
 
-      # 6. 上传构建产物（可执行文件）
       - name: Upload executable as artifact
         uses: actions/upload-artifact@v4
         with:
           name: api_test-windows-x64
           path: dist/api_test.exe
-          retention-days: 7  # 构建产物保留7天
+          retention-days: 7
