@@ -1,13 +1,12 @@
-name: Build Windows Executable (Manual Trigger)
+name: Build Windows Executable
 
-# 仅允许手动触发（不会因 push 自动运行）
 on:
   workflow_dispatch:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
-    
+    runs-on: windows-2022
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,20 +20,29 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if (Test-Path -Path "requirement.txt") {
-            pip install -r requirement.txt
+
+          if (Test-Path -Path "requirements.txt") {
+            pip install -r requirements.txt
           } else {
-            Write-Host "No requirement.txt found."
+            Write-Host "No requirements.txt found."
           }
 
       - name: Install PyInstaller
-        run: pip install pyinstaller
+        run: |
+          pip install pyinstaller
 
-      # 关键修复：使用 --collect-all 确保 encodings 完整包含
-      - name: Build executable with PyInstaller
-        run: pyinstaller --onefile --windowed --collect-all encodings --collect-all codecs --name=api_test api_test.py
+      - name: Build executable
+        run: |
+          pyinstaller `
+            --onefile `
+            --windowed `
+            --hidden-import encodings `
+            --hidden-import codecs `
+            --clean `
+            --name api_test `
+            api_test.py
 
-      - name: Upload executable as artifact
+      - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
           name: api_test-windows-x64
