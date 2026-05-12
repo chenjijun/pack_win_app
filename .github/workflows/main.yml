@@ -1,0 +1,38 @@
+name: 打包 Windows 接口拨测工具
+
+# 核心：只允许手动点击运行，不自动触发
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    name: Windows 打包
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: "x64"
+
+      - name: 升级 pip
+        run: python -m pip install --upgrade pip
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 安装 PyInstaller
+        run: pip install pyinstaller
+
+      - name: 打包成单文件 EXE（无窗口）
+        run: |
+          pyinstaller -w -F --noconsole --clean api_test.py
+
+      - name: 上传打包好的 EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: 接口拨测工具_win_x64
+          path: dist/*.exe
